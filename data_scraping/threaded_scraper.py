@@ -3,7 +3,7 @@ import logging
 import re
 import threading
 from concurrent.futures import ThreadPoolExecutor
-from queue import Queue, Full
+from queue import Full, Queue
 
 import pandas as pd
 import requests
@@ -38,9 +38,8 @@ def get_rating(img) -> str:
 
 
 def consumer(queue: Queue, finished: threading.Event, data: list):
-    logger = logging.getLogger('consumer')
+    logger = logging.getLogger("consumer")
     while not queue.empty() or not finished.is_set():
-
         try:
             date, rating, url = queue.get(timeout=5)
         except queue.Empty:
@@ -64,7 +63,7 @@ def consumer(queue: Queue, finished: threading.Event, data: list):
 
 
 def producer(queue: Queue, finished: threading.Event):
-    logger = logging.getLogger('producer')
+    logger = logging.getLogger("producer")
     url = BASE_URL + URL
     while url:
         logger.info(f"processing page {url}")
@@ -106,7 +105,7 @@ def producer(queue: Queue, finished: threading.Event):
 
 if __name__ == "__main__":
     data = []
-    queue = Queue() #  maxsize=10)
+    queue = Queue()  #  maxsize=10)
     finished = threading.Event()
     threads = []
     workers = 10
@@ -116,4 +115,6 @@ if __name__ == "__main__":
             threads.append(executor.submit(consumer, queue, finished, data))
 
     dates, ratings, urls, problems = zip(*data)
-    df = pd.DataFrame({'date': dates, 'rating':ratings, 'url':urls, 'problem':problems})
+    df = pd.DataFrame(
+        {"date": dates, "rating": ratings, "url": urls, "problem": problems}
+    )
